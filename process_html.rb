@@ -2,7 +2,7 @@ require 'rubygems'
 require 'nokogiri'
 
 HTML_DIR = "raw-html"
-
+DB_FILE = File.join(File.dirname(__FILE__), "lobbyist_records.db")
 
 records = []
 
@@ -41,3 +41,23 @@ Dir["#{HTML_DIR}/page-*.html"].each do |file|
   end
 end
 
+require 'active_record'
+ActiveRecord::Base.establish_connection({:adapter => "sqlite3", :database => DB_FILE})
+
+ActiveRecord::Schema.define do
+  create_table :lobbyist_records, :force => true do |t|
+    t.column :lobbyist, :string
+    t.column :client, :string
+    t.column :industry, :string
+    t.column :industry_type, :string
+    t.column :total_pay, :string
+    t.column :client_out_of_state, :string
+    t.column :notes, :string
+  end
+end
+
+class LobbyistRecord < ActiveRecord::Base; end
+
+records.each do |record|
+  LobbyistRecord.create!(record)
+end
